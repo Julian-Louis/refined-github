@@ -110,12 +110,17 @@ function makeFieldKinder(field: HTMLParagraphElement): void {
 		// https://github.com/refined-github/refined-github/pull/6991/files
 		field.textContent = 'Leave a comment, be kind';
 	} else {
-		features.log.error(import.meta.url, `Unexpected placeholder text: ${field.textContent}`);
+		throw new Error(`Unexpected placeholder text: ${field.textContent}`);
 	}
+}
+
+function makeReactFieldKinder(field: HTMLTextAreaElement): void {
+	field.placeholder = 'Add your comment here, be kind';
 }
 
 function initKindness(signal: AbortSignal): void {
 	observe('p.CommentBox-placeholder', makeFieldKinder, {signal});
+	observe('textarea[placeholder="Use Markdown to format your comment"]', makeReactFieldKinder, {signal});
 }
 
 void features.add(import.meta.url, {

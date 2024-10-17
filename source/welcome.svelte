@@ -6,7 +6,7 @@
 
 	import './helpers/target-blank-polyfill.js';
 	import optionsStorage from './options-storage.js';
-	import {baseApiFetch} from './github-helpers/github-token.js';
+	import {hasValidGitHubComToken} from './github-helpers/github-token.js';
 
 	let stepVisible = 1;
 	let stepValid = 0;
@@ -19,7 +19,7 @@
 
 	$: if (stepValid === 3) {
 		setTimeout(() => {
-			location.href = 'https://github.com/refined-github/refined-github/wiki';
+			location.replace('https://github.com/refined-github/refined-github/wiki');
 		}, 2000);
 	}
 
@@ -52,11 +52,10 @@
 	}
 
 	async function verifyToken() {
-		try {
-			await baseApiFetch({apiBase: 'https://api.github.com/', token: tokenInput, path: '/'});
+		if (await hasValidGitHubComToken(tokenInput)) {
 			stepValid = 3;
 			tokenError = '';
-		} catch {
+		} else {
 			tokenError = 'Invalid token';
 		}
 	}
@@ -95,7 +94,7 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<li class:valid={stepValid >= 2} class:visible={stepVisible >= 2} class='will-show' on:click={showThirdStep}>
 			<a
-				href='https://github.com/settings/tokens/new?description=Refined%20GitHub&scopes=repo,read:project'
+				href='https://github.com/settings/tokens/new?description=Refined%20GitHub&scopes=repo,read:project&default_expires_at=none'
 				on:click={markSecondStep}
 			>
 				Generate a token
@@ -112,8 +111,9 @@
 			<label for='token-input'>Paste token:</label>
 			<input
 				id='token-input'
-				type='password'
+				type='text'
 				size='10'
+				autocomplete='current-password'
 				name='personalToken'
 				bind:value={tokenInput}
 			/>
